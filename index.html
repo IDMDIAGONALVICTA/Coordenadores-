@@ -754,6 +754,22 @@
             }, 100);
         }
 
+        function formatCurrency(value) {
+            const num = parseFloat(value);
+            if (isNaN(num)) return value;
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(num);
+        }
+
+        function isCurrencyColumn(header) {
+            const currencyKeywords = ['VGV', 'VALOR', 'PREÇO', 'CUSTO', 'RECEITA'];
+            return currencyKeywords.some(keyword => header.toUpperCase().includes(keyword));
+        }
+
         function renderTableTab(coordenador) {
             const data = allData.filter(row => row['Coordenador']?.trim() === coordenador);
             const contentContainer = document.getElementById('contentContainer');
@@ -775,7 +791,11 @@
             data.forEach(row => {
                 html += '<tr>';
                 headers.forEach(header => {
-                    html += `<td>${row[header] || ''}</td>`;
+                    let value = row[header] || '';
+                    if (isCurrencyColumn(header) && value !== '') {
+                        value = formatCurrency(value);
+                    }
+                    html += `<td>${value}</td>`;
                 });
                 html += '</tr>';
             });
