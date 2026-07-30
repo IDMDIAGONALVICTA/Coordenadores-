@@ -653,10 +653,10 @@
             html += '</div></div>';
 
             html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px;">';
-            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">📈 Vendas por Mês</h3><div style="position: relative; height: 300px;"><canvas id="chartVendasMes"></canvas></div></div>';
-            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">📅 Vendas por Semana</h3><div style="position: relative; height: 300px;"><canvas id="chartVendasSemana"></canvas></div></div>';
+            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0; grid-column: 1 / -1;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">📈 Vendas por Mês</h3><div style="position: relative; height: 300px;"><canvas id="chartVendasMes"></canvas></div></div>';
             html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">🏢 Vendas por Empreendimento</h3><div style="position: relative; height: 300px;"><canvas id="chartEmpreendimento"></canvas></div></div>';
-            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0; grid-column: 1 / -1;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">👥 Comparação entre Coordenadores</h3><div style="position: relative; height: 300px;"><canvas id="chartCoordenadores"></canvas></div></div>';
+            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">👥 Comparação entre Coordenadores</h3><div style="position: relative; height: 300px;"><canvas id="chartCoordenadores"></canvas></div></div>';
+            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0; grid-column: 1 / -1;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">📅 Vendas por Semana</h3><div style="position: relative; height: 300px;"><canvas id="chartVendasSemana"></canvas></div></div>';
             html += '</div>';
 
             contentContainer.innerHTML = html;
@@ -709,7 +709,9 @@
             const vendidosPorMes = {};
             const vendidosPorEmpreendimento = {};
             const vendidosPorCoordenador = {};
-            const vendidosPorSemana = {};
+            const visitasPorSemana = {};
+            const pastasPorSemana = {};
+            const vendaSporSemana = {};
 
             data.forEach(row => {
                 const mes = row['MÊS']?.trim() || 'Sem mês';
@@ -717,11 +719,15 @@
                 const coordenador = row['Coordenador']?.trim() || 'Desconhecido';
                 const semana = row['SEMANA']?.trim() || 'Sem semana';
                 const vendas = parseInt(row['QTD VENDA '] || row['QTD VENDA']) || 0;
+                const visitas = parseInt(row['VISITA']) || 0;
+                const pastas = parseInt(row['QTD PASTA '] || row['QTD PASTA']) || 0;
 
                 vendidosPorMes[mes] = (vendidosPorMes[mes] || 0) + vendas;
                 vendidosPorEmpreendimento[empreendimento] = (vendidosPorEmpreendimento[empreendimento] || 0) + vendas;
                 vendidosPorCoordenador[coordenador] = (vendidosPorCoordenador[coordenador] || 0) + vendas;
-                vendidosPorSemana[semana] = (vendidosPorSemana[semana] || 0) + vendas;
+                visitasPorSemana[semana] = (visitasPorSemana[semana] || 0) + visitas;
+                pastasPorSemana[semana] = (pastasPorSemana[semana] || 0) + pastas;
+                vendaSporSemana[semana] = (vendaSporSemana[semana] || 0) + vendas;
             });
 
             const colors = ['#2d5016', '#3d7c1f', '#5fa032', '#f5f1e8', '#e8dcc8', '#d9c7a8', '#1a3a0a', '#4a9d3d'];
@@ -773,10 +779,22 @@
                 new Chart(ctxSemana, {
                     type: 'bar',
                     data: {
-                        labels: Object.keys(vendidosPorSemana),
+                        labels: Object.keys(visitasPorSemana),
                         datasets: [{
-                            label: 'Vendas',
-                            data: Object.values(vendidosPorSemana),
+                            label: 'Visita',
+                            data: Object.values(visitasPorSemana),
+                            backgroundColor: '#2d5016',
+                            borderColor: '#1a3a0a',
+                            borderWidth: 1
+                        }, {
+                            label: 'Pasta',
+                            data: Object.values(pastasPorSemana),
+                            backgroundColor: '#f5f1e8',
+                            borderColor: '#d9c7a8',
+                            borderWidth: 1
+                        }, {
+                            label: 'Venda',
+                            data: Object.values(vendaSporSemana),
                             backgroundColor: '#3d7c1f',
                             borderColor: '#2d5016',
                             borderWidth: 1
@@ -785,7 +803,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false }, datalabels: { display: false } },
+                        plugins: { legend: { display: true, position: 'bottom' }, datalabels: { display: false } },
                         scales: { y: { beginAtZero: true } }
                     }
                 });
