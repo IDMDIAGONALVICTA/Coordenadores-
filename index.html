@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acompanhamento Coordenadores Victa</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         * {
             margin: 0;
@@ -76,7 +77,6 @@
 
         .filter-arrow {
             transition: transform 0.3s ease;
-            font-size: 18px;
         }
 
         .filter-arrow.open {
@@ -190,41 +190,6 @@
             min-height: 500px;
         }
 
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e0e0e0;
-        }
-
-        .chart-card h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -291,10 +256,6 @@
             font-size: 12px;
         }
 
-        tbody tr {
-            transition: background-color 0.2s ease;
-        }
-
         tbody tr:hover {
             background: #f0f4ff !important;
         }
@@ -305,15 +266,6 @@
 
         tbody tr:nth-child(even) {
             background: #f8f9fc;
-        }
-
-        td:nth-child(n+5) {
-            text-align: right;
-            font-family: 'Courier New', monospace;
-        }
-
-        th:nth-child(n+5) {
-            text-align: right;
         }
 
         .footer {
@@ -395,15 +347,6 @@
             color: #666;
         }
 
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 20px;
-            border: 1px solid #f5c6cb;
-        }
-
         @media (max-width: 768px) {
             .checkbox-group {
                 grid-template-columns: 1fr;
@@ -423,14 +366,6 @@
 
             .header h1 {
                 font-size: 20px;
-            }
-
-            .chart-container {
-                height: 250px;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
             }
 
             .tabs {
@@ -492,6 +427,16 @@
                 </div>
             </div>
 
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter('semana')">
+                    <span>📅 Semana</span>
+                    <span class="filter-arrow" id="arrow-semana">▼</span>
+                </div>
+                <div class="filter-content" id="content-semana">
+                    <div class="checkbox-group" id="semana-list"></div>
+                </div>
+            </div>
+
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="refreshDashboard()">🔄 Atualizar</button>
                 <button class="btn btn-secondary" onclick="exportToCSV()">📥 Exportar</button>
@@ -513,7 +458,6 @@
 
     <script>
         let allData = [];
-        let charts = {};
         let currentTab = 'dashboard';
 
         const API_URL = 'https://script.google.com/macros/s/AKfycbwCcPBo4Eo31Ti1Yz62X9Yr8YW171G6GqOlhOSgfiYi4Cl-x4Ennsp9ueC0tX0Djtkx/exec';
@@ -539,13 +483,12 @@
             script.src = API_URL + '?callback=processarDados';
             script.onerror = function() {
                 console.error('Erro ao carregar dados');
-                contentContainer.innerHTML = '<div class="error">❌ Erro ao carregar dados. Verifique a conexão.</div>';
+                contentContainer.innerHTML = '<div style="color: red; padding: 20px;">❌ Erro ao carregar dados</div>';
             };
             document.head.appendChild(script);
         }
 
         window.processarDados = function(data) {
-            const contentContainer = document.getElementById('contentContainer');
             try {
                 allData = data.dados || [];
                 if (!Array.isArray(allData)) {
@@ -554,8 +497,7 @@
                 document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
                 initializeDashboard();
             } catch(e) {
-                console.error('Erro ao processar dados:', e);
-                contentContainer.innerHTML = '<div class="error">❌ Erro ao processar dados.</div>';
+                console.error('Erro:', e);
             }
         };
 
@@ -588,65 +530,41 @@
             const empreendimentos = new Set();
             const meses = new Set();
             const anos = new Set();
+            const semanas = new Set();
 
             allData.forEach(row => {
                 if (row['Coordenador']) coordenadores.add(row['Coordenador'].trim());
                 if (row['EMPREENDIMENTO']) empreendimentos.add(row['EMPREENDIMENTO'].trim());
                 if (row['MÊS']) meses.add(row['MÊS'].trim());
                 if (row['ANO']) anos.add(String(row['ANO']).trim());
+                if (row['SEMANA']) semanas.add(row['SEMANA'].trim());
             });
 
-            const coordList = document.getElementById('coordenador-list');
-            coordList.innerHTML = '';
-            Array.from(coordenadores).sort().forEach(coord => {
-                coordList.innerHTML += `
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="coord-${coord}" value="${coord}" onchange="refreshDashboard()">
-                        <label for="coord-${coord}">${coord}</label>
-                    </div>
-                `;
-            });
+            document.getElementById('coordenador-list').innerHTML = Array.from(coordenadores).sort().map(coord => 
+                `<div class="checkbox-item"><input type="checkbox" id="coord-${coord}" value="${coord}" onchange="refreshDashboard()"><label for="coord-${coord}">${coord}</label></div>`
+            ).join('');
 
-            const empList = document.getElementById('empreendimento-list');
-            empList.innerHTML = '';
-            Array.from(empreendimentos).sort().forEach(emp => {
-                empList.innerHTML += `
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="emp-${emp}" value="${emp}" onchange="refreshDashboard()">
-                        <label for="emp-${emp}">${emp}</label>
-                    </div>
-                `;
-            });
+            document.getElementById('empreendimento-list').innerHTML = Array.from(empreendimentos).sort().map(emp => 
+                `<div class="checkbox-item"><input type="checkbox" id="emp-${emp}" value="${emp}" onchange="refreshDashboard()"><label for="emp-${emp}">${emp}</label></div>`
+            ).join('');
 
-            const mesList = document.getElementById('mes-list');
-            mesList.innerHTML = '';
-            Array.from(meses).sort().forEach(mes => {
-                mesList.innerHTML += `
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="mes-${mes}" value="${mes}" onchange="refreshDashboard()">
-                        <label for="mes-${mes}">${mes}</label>
-                    </div>
-                `;
-            });
+            document.getElementById('mes-list').innerHTML = Array.from(meses).sort().map(mes => 
+                `<div class="checkbox-item"><input type="checkbox" id="mes-${mes}" value="${mes}" onchange="refreshDashboard()"><label for="mes-${mes}">${mes}</label></div>`
+            ).join('');
 
-            const anoList = document.getElementById('ano-list');
-            anoList.innerHTML = '';
-            Array.from(anos).sort().reverse().forEach(ano => {
-                anoList.innerHTML += `
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="ano-${ano}" value="${ano}" onchange="refreshDashboard()">
-                        <label for="ano-${ano}">${ano}</label>
-                    </div>
-                `;
-            });
+            document.getElementById('ano-list').innerHTML = Array.from(anos).sort().reverse().map(ano => 
+                `<div class="checkbox-item"><input type="checkbox" id="ano-${ano}" value="${ano}" onchange="refreshDashboard()"><label for="ano-${ano}">${ano}</label></div>`
+            ).join('');
+
+            document.getElementById('semana-list').innerHTML = Array.from(semanas).sort().map(semana => 
+                `<div class="checkbox-item"><input type="checkbox" id="semana-${semana}" value="${semana}" onchange="refreshDashboard()"><label for="semana-${semana}">${semana}</label></div>`
+            ).join('');
         }
 
         function displayTab(tabName) {
             currentTab = tabName;
             
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
             if (tabName === 'dashboard') {
@@ -657,101 +575,30 @@
         }
 
         function getSelectedFilters() {
-            const coordenadores = Array.from(document.querySelectorAll('#coordenador-list input:checked')).map(el => el.value);
-            const empreendimentos = Array.from(document.querySelectorAll('#empreendimento-list input:checked')).map(el => el.value);
-            const meses = Array.from(document.querySelectorAll('#mes-list input:checked')).map(el => el.value);
-            const anos = Array.from(document.querySelectorAll('#ano-list input:checked')).map(el => el.value);
-
-            return { coordenadores, empreendimentos, meses, anos };
+            return {
+                coordenadores: Array.from(document.querySelectorAll('#coordenador-list input:checked')).map(el => el.value),
+                empreendimentos: Array.from(document.querySelectorAll('#empreendimento-list input:checked')).map(el => el.value),
+                meses: Array.from(document.querySelectorAll('#mes-list input:checked')).map(el => el.value),
+                anos: Array.from(document.querySelectorAll('#ano-list input:checked')).map(el => el.value),
+                semanas: Array.from(document.querySelectorAll('#semana-list input:checked')).map(el => el.value)
+            };
         }
 
         function getFilteredData() {
             const filters = getSelectedFilters();
-
             return allData.filter(row => {
                 let matches = true;
-
                 if (filters.coordenadores.length > 0 && !filters.coordenadores.includes(row['Coordenador']?.trim())) matches = false;
                 if (filters.empreendimentos.length > 0 && !filters.empreendimentos.includes(row['EMPREENDIMENTO']?.trim())) matches = false;
                 if (filters.meses.length > 0 && !filters.meses.includes(row['MÊS']?.trim())) matches = false;
                 if (filters.anos.length > 0 && !filters.anos.includes(String(row['ANO']).trim())) matches = false;
-
+                if (filters.semanas.length > 0 && !filters.semanas.includes(row['SEMANA']?.trim())) matches = false;
                 return matches;
             });
         }
 
         function refreshDashboard() {
-            if (currentTab === 'dashboard') {
-                renderDashboard();
-            }
-        }
-
-        function renderDashboard() {
-            const data = getFilteredData();
-            const contentContainer = document.getElementById('contentContainer');
-
-            if (data.length === 0) {
-                contentContainer.innerHTML = '<p style="text-align: center; padding: 40px;">Nenhum dado encontrado</p>';
-                return;
-            }
-
-            let totalVendas = 0;
-            let totalVGV = 0;
-            let totalVisitas = 0;
-            let totalPastas = 0;
-
-            data.forEach(row => {
-                totalVisitas += parseInt(row['VISITA']) || 0;
-                totalPastas += parseInt(row['QTD PASTA ']) || 0;
-                totalVendas += parseInt(row['QTD VENDA ']) || 0;
-                totalVGV += parseInt(row['VGV']) || 0;
-            });
-
-            let html = '<div class="stats-grid">';
-            html += `<div class="stat-card"><h4>Total de Vendas</h4><div class="value">${totalVendas}</div></div>`;
-            html += `<div class="stat-card"><h4>VGV Total</h4><div class="value">R$ ${(totalVGV / 1000000).toFixed(1)}M</div></div>`;
-            html += `<div class="stat-card"><h4>Visitas</h4><div class="value">${totalVisitas}</div></div>`;
-            html += `<div class="stat-card"><h4>Pastas</h4><div class="value">${totalPastas}</div></div>`;
-            html += '</div>';
-
-            html += '<div class="chart-card" style="grid-column: 1 / -1;"><h3>📊 Funil de Vendas</h3>';
-            html += '<div class="funnel-container">';
-
-            html += '<div class="funnel-stage">';
-            html += '<div class="funnel-label">👥 Visita</div>';
-            html += `<div class="funnel-bar" style="width: 100%; background: linear-gradient(135deg, #2d5016 0%, #1a3a0a 100%);">${totalVisitas}</div>`;
-            html += `<div class="funnel-percentage">100%</div>`;
-            html += '</div>';
-
-            const convPastaVisita = totalVisitas > 0 ? (totalPastas / totalVisitas) * 100 : 0;
-            const widthPasta = totalVisitas > 0 ? (totalPastas / totalVisitas) * 100 : 0;
-            html += '<div class="funnel-stage">';
-            html += '<div class="funnel-label">📋 Pasta</div>';
-            html += `<div class="funnel-bar" style="width: ${widthPasta}%; background: linear-gradient(135deg, #f5f1e8 0%, #e8dcc8 100%); color: #2d5016;">${totalPastas}</div>`;
-            html += `<div class="funnel-percentage">Pasta → Visita: ${convPastaVisita.toFixed(1)}%</div>`;
-            html += '</div>';
-
-            const convVendaPasta = totalPastas > 0 ? (totalVendas / totalPastas) * 100 : 0;
-            const widthVenda = totalVisitas > 0 ? (totalVendas / totalVisitas) * 100 : 0;
-            html += '<div class="funnel-stage">';
-            html += '<div class="funnel-label">💰 Venda</div>';
-            html += `<div class="funnel-bar" style="width: ${widthVenda}%; background: linear-gradient(135deg, #3d7c1f 0%, #5fa032 100%);">${totalVendas}</div>`;
-            html += `<div class="funnel-percentage">Venda → Pasta: ${convVendaPasta.toFixed(1)}%</div>`;
-            html += '</div>';
-
-            html += '</div></div>';
-
-            html += '<div class="dashboard-grid">';
-            html += '<div class="chart-card"><h3>📈 Vendas por Mês</h3><div class="chart-container"><canvas id="chartVendasMes"></canvas></div></div>';
-            html += '<div class="chart-card"><h3>🏢 Vendas por Empreendimento</h3><div class="chart-container"><canvas id="chartEmpreendimento"></canvas></div></div>';
-            html += '<div class="chart-card"><h3>👥 Comparação entre Coordenadores</h3><div class="chart-container"><canvas id="chartCoordenadores"></canvas></div></div>';
-            html += '</div>';
-
-            contentContainer.innerHTML = html;
-
-            setTimeout(() => {
-                createCharts(data);
-            }, 100);
+            if (currentTab === 'dashboard') renderDashboard();
         }
 
         function formatCurrency(value) {
@@ -766,8 +613,61 @@
         }
 
         function isCurrencyColumn(header) {
-            const currencyKeywords = ['VGV', 'VALOR', 'PREÇO', 'CUSTO', 'RECEITA'];
-            return currencyKeywords.some(keyword => header.toUpperCase().includes(keyword));
+            return ['VGV', 'VALOR', 'PREÇO', 'CUSTO', 'RECEITA'].some(keyword => header.toUpperCase().includes(keyword));
+        }
+
+        function renderDashboard() {
+            const data = getFilteredData();
+            const contentContainer = document.getElementById('contentContainer');
+
+            if (data.length === 0) {
+                contentContainer.innerHTML = '<p style="text-align: center; padding: 40px;">Nenhum dado encontrado</p>';
+                return;
+            }
+
+            let totalVendas = 0, totalVGV = 0, totalVisitas = 0, totalPastas = 0;
+
+            data.forEach(row => {
+                totalVisitas += parseInt(row['VISITA']) || 0;
+                totalPastas += parseInt(row['QTD PASTA '] || row['QTD PASTA']) || 0;
+                totalVendas += parseInt(row['QTD VENDA '] || row['QTD VENDA']) || 0;
+                totalVGV += parseInt(row['VGV']) || 0;
+            });
+
+            let html = '<div class="stats-grid">';
+            html += `<div class="stat-card"><h4>Total de Vendas</h4><div class="value">${totalVendas}</div></div>`;
+            html += `<div class="stat-card"><h4>VGV Total</h4><div class="value">R$ ${(totalVGV / 1000000).toFixed(1)}M</div></div>`;
+            html += `<div class="stat-card"><h4>Visitas</h4><div class="value">${totalVisitas}</div></div>`;
+            html += `<div class="stat-card"><h4>Pastas</h4><div class="value">${totalPastas}</div></div>`;
+            html += '</div>';
+
+            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0; margin-bottom: 30px;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">📊 Funil de Vendas</h3>';
+            html += '<div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px;">';
+
+            const convPastaVisita = totalVisitas > 0 ? (totalPastas / totalVisitas) * 100 : 0;
+            const convVendaPasta = totalPastas > 0 ? (totalVendas / totalPastas) * 100 : 0;
+
+            html += `<div style="width: 100%; background: linear-gradient(135deg, #2d5016 0%, #1a3a0a 100%); color: white; padding: 12px; text-align: center; font-weight: bold; border-radius: 0px; clip-path: polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%);"><div style=\"font-size: 14px;\">👥 Visita</div><div style=\"font-size: 16px; margin-top: 3px;\">${totalVisitas}</div></div>`;
+            html += `<div style="width: ${convPastaVisita}%; margin: 0 auto; background: linear-gradient(135deg, #f5f1e8 0%, #e8dcc8 100%); color: #2d5016; padding: 12px; text-align: center; font-weight: bold; border-radius: 0px; clip-path: polygon(0% 0%, 100% 0%, 92% 100%, 8% 100%);"><div style=\"font-size: 14px;\">📋 Pasta</div><div style=\"font-size: 16px; margin-top: 3px;\">${totalPastas}</div><div style=\"font-size: 11px; margin-top: 2px;\">${convPastaVisita.toFixed(1)}%</div></div>`;
+            html += `<div style="width: ${Math.max(convPastaVisita * 0.65, 25)}%; margin: 0 auto; background: linear-gradient(135deg, #3d7c1f 0%, #5fa032 100%); color: white; padding: 12px; text-align: center; font-weight: bold; border-radius: 0px; clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);"><div style=\"font-size: 14px;\">💰 Venda</div><div style=\"font-size: 16px; margin-top: 3px;\">${totalVendas}</div><div style=\"font-size: 11px; margin-top: 2px;\">${convVendaPasta.toFixed(1)}%</div></div>`;
+            html += '</div></div>';
+
+            html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px;">';
+            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">📈 Vendas por Mês</h3><div style="position: relative; height: 300px;"><canvas id="chartVendasMes"></canvas></div></div>';
+            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">📅 Vendas por Semana</h3><div style="position: relative; height: 300px;"><canvas id="chartVendasSemana"></canvas></div></div>';
+            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">🏢 Vendas por Empreendimento</h3><div style="position: relative; height: 300px;"><canvas id="chartEmpreendimento"></canvas></div></div>';
+            html += '<div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: 1px solid #e0e0e0; grid-column: 1 / -1;"><h3 style="color: #333; margin-bottom: 15px; font-size: 16px; font-weight: 700;">👥 Comparação entre Coordenadores</h3><div style="position: relative; height: 300px;"><canvas id="chartCoordenadores"></canvas></div></div>';
+            html += '</div>';
+
+            contentContainer.innerHTML = html;
+
+            setTimeout(() => {
+                try {
+                    createCharts(data);
+                } catch(e) {
+                    console.error('Erro ao criar gráficos:', e);
+                }
+            }, 100);
         }
 
         function renderTableTab(coordenador) {
@@ -805,28 +705,30 @@
         }
 
         function createCharts(data) {
+            Chart.register(ChartDataLabels);
             const vendidosPorMes = {};
             const vendidosPorEmpreendimento = {};
             const vendidosPorCoordenador = {};
+            const vendidosPorSemana = {};
 
             data.forEach(row => {
                 const mes = row['MÊS']?.trim() || 'Sem mês';
                 const empreendimento = row['EMPREENDIMENTO']?.trim() || 'Sem empreendimento';
                 const coordenador = row['Coordenador']?.trim() || 'Desconhecido';
-
-                const vendas = parseInt(row['QTD VENDA ']) || 0;
+                const semana = row['SEMANA']?.trim() || 'Sem semana';
+                const vendas = parseInt(row['QTD VENDA '] || row['QTD VENDA']) || 0;
 
                 vendidosPorMes[mes] = (vendidosPorMes[mes] || 0) + vendas;
                 vendidosPorEmpreendimento[empreendimento] = (vendidosPorEmpreendimento[empreendimento] || 0) + vendas;
                 vendidosPorCoordenador[coordenador] = (vendidosPorCoordenador[coordenador] || 0) + vendas;
+                vendidosPorSemana[semana] = (vendidosPorSemana[semana] || 0) + vendas;
             });
 
             const colors = ['#2d5016', '#3d7c1f', '#5fa032', '#f5f1e8', '#e8dcc8', '#d9c7a8', '#1a3a0a', '#4a9d3d'];
 
             const ctxMes = document.getElementById('chartVendasMes');
             if (ctxMes) {
-                if (charts.vendasMes) charts.vendasMes.destroy();
-                charts.vendasMes = new Chart(ctxMes, {
+                new Chart(ctxMes, {
                     type: 'bar',
                     data: {
                         labels: Object.keys(vendidosPorMes),
@@ -841,7 +743,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: true } },
+                        plugins: { legend: { display: false }, datalabels: { display: false } },
                         scales: { y: { beginAtZero: true } }
                     }
                 });
@@ -849,8 +751,7 @@
 
             const ctxEmpreendimento = document.getElementById('chartEmpreendimento');
             if (ctxEmpreendimento) {
-                if (charts.empreendimento) charts.empreendimento.destroy();
-                charts.empreendimento = new Chart(ctxEmpreendimento, {
+                new Chart(ctxEmpreendimento, {
                     type: 'doughnut',
                     data: {
                         labels: Object.keys(vendidosPorEmpreendimento),
@@ -862,15 +763,37 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom' } }
+                        plugins: { legend: { display: false }, datalabels: { display: false } }
+                    }
+                });
+            }
+
+            const ctxSemana = document.getElementById('chartVendasSemana');
+            if (ctxSemana) {
+                new Chart(ctxSemana, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(vendidosPorSemana),
+                        datasets: [{
+                            label: 'Vendas',
+                            data: Object.values(vendidosPorSemana),
+                            backgroundColor: '#3d7c1f',
+                            borderColor: '#2d5016',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, datalabels: { display: false } },
+                        scales: { y: { beginAtZero: true } }
                     }
                 });
             }
 
             const ctxCoordenadores = document.getElementById('chartCoordenadores');
             if (ctxCoordenadores) {
-                if (charts.coordenadores) charts.coordenadores.destroy();
-                charts.coordenadores = new Chart(ctxCoordenadores, {
+                new Chart(ctxCoordenadores, {
                     type: 'bar',
                     data: {
                         labels: Object.keys(vendidosPorCoordenador),
@@ -883,7 +806,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        plugins: { legend: { display: false }, datalabels: { display: false } },
                         scales: { y: { beginAtZero: true } }
                     }
                 });
