@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Interativo - Coordenadores</title>
+    <title>Acompanhamento Coordenadores Victa</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         * {
@@ -49,47 +49,79 @@
             padding: 20px 30px;
             background: #f5f1e8;
             border-bottom: 1px solid #e0d5c0;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
         }
 
-        .control-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .control-group label {
-            font-weight: 600;
-            color: #333;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        .control-group input,
-        .control-group select {
-            padding: 8px 12px;
+        .filter-section {
+            margin-bottom: 15px;
             border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 14px;
             background: white;
-            color: #333;
-            min-width: 120px;
         }
 
-        .control-group input:focus,
-        .control-group select:focus {
-            outline: none;
-            border-color: #2d5016;
-            box-shadow: 0 0 0 3px rgba(45, 80, 22, 0.1);
+        .filter-header {
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #2d5016 0%, #3d7c1f 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            user-select: none;
+        }
+
+        .filter-header:hover {
+            background: linear-gradient(135deg, #1a3a0a 0%, #2d5016 100%);
+        }
+
+        .filter-arrow {
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+
+        .filter-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .filter-content {
+            display: none;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .filter-content.open {
+            display: block;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 13px;
+            color: #333;
         }
 
         .btn-group {
             display: flex;
             gap: 10px;
-            margin-left: auto;
+            margin-top: 15px;
         }
 
         .btn {
@@ -136,7 +168,7 @@
             background: white;
             color: #666;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
@@ -230,7 +262,6 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 0;
             font-size: 12px;
         }
 
@@ -373,24 +404,17 @@
             border: 1px solid #f5c6cb;
         }
 
-        @media (max-width: 1200px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
         @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
+            .checkbox-group {
+                grid-template-columns: 1fr;
             }
 
             .btn-group {
-                margin-left: 0;
-                width: 100%;
+                flex-direction: column;
             }
 
             .btn {
-                flex: 1;
+                width: 100%;
             }
 
             .stats-grid {
@@ -405,16 +429,17 @@
                 height: 250px;
             }
 
-            table {
-                font-size: 11px;
+            .dashboard-grid {
+                grid-template-columns: 1fr;
             }
 
-            th, td {
-                padding: 8px 6px;
+            .tabs {
+                overflow-x: auto;
             }
 
-            .control-group select {
-                min-width: 100px;
+            .tab-button {
+                font-size: 12px;
+                padding: 12px 15px;
             }
         }
     </style>
@@ -422,46 +447,49 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Dashboard Interativo - Coordenadores</h1>
+            <h1>📊 Acompanhamento Coordenadores Victa</h1>
             <p><span class="status-indicator"></span>Dados sincronizados automaticamente com Google Sheets</p>
         </div>
 
         <div class="controls">
-            <div class="control-group">
-                <label for="coordenadorFilter">👤 Coordenador:</label>
-                <select id="coordenadorFilter">
-                    <option value="">Todos</option>
-                </select>
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter('coordenador')">
+                    <span>👤 Coordenador</span>
+                    <span class="filter-arrow" id="arrow-coordenador">▼</span>
+                </div>
+                <div class="filter-content" id="content-coordenador">
+                    <div class="checkbox-group" id="coordenador-list"></div>
+                </div>
             </div>
 
-            <div class="control-group">
-                <label for="typeFilter">🏢 Tipo:</label>
-                <select id="typeFilter">
-                    <option value="">Todos</option>
-                    <option value="IMOB">IMOB</option>
-                    <option value="HOUSE">HOUSE</option>
-                </select>
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter('empreendimento')">
+                    <span>🏗️ Empreendimento</span>
+                    <span class="filter-arrow" id="arrow-empreendimento">▼</span>
+                </div>
+                <div class="filter-content" id="content-empreendimento">
+                    <div class="checkbox-group" id="empreendimento-list"></div>
+                </div>
             </div>
 
-            <div class="control-group">
-                <label for="empreendimentoFilter">🏗️ Empreendimento:</label>
-                <select id="empreendimentoFilter">
-                    <option value="">Todos</option>
-                </select>
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter('mes')">
+                    <span>📅 Mês</span>
+                    <span class="filter-arrow" id="arrow-mes">▼</span>
+                </div>
+                <div class="filter-content" id="content-mes">
+                    <div class="checkbox-group" id="mes-list"></div>
+                </div>
             </div>
 
-            <div class="control-group">
-                <label for="monthFilter">📅 Mês:</label>
-                <select id="monthFilter">
-                    <option value="">Todos</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <label for="yearFilter">📆 Ano:</label>
-                <select id="yearFilter">
-                    <option value="">Todos</option>
-                </select>
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFilter('ano')">
+                    <span>📆 Ano</span>
+                    <span class="filter-arrow" id="arrow-ano">▼</span>
+                </div>
+                <div class="filter-content" id="content-ano">
+                    <div class="checkbox-group" id="ano-list"></div>
+                </div>
             </div>
 
             <div class="btn-group">
@@ -488,147 +516,174 @@
         let charts = {};
         let currentTab = 'dashboard';
 
-        // URL da API do Google Apps Script
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz5tzNtpfR4_ulmb3Qohxl1pHVk7L-VHYi9Bl7p6V8qQGanVyAYdyRlLDXn0NhPpD165w/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwCcPBo4Eo31Ti1Yz62X9Yr8YW171G6GqOlhOSgfiYi4Cl-x4Ennsp9ueC0tX0Djtkx/exec';
 
         document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
             carregarDados();
-            // Atualizar dados a cada 5 minutos
             setInterval(carregarDados, 5 * 60 * 1000);
         });
 
-        function setupEventListeners() {
-            document.getElementById('coordenadorFilter').addEventListener('change', () => { populateEmpreendimentos(); refreshDashboard(); });
-            document.getElementById('typeFilter').addEventListener('change', () => { populateEmpreendimentos(); refreshDashboard(); });
-            document.getElementById('empreendimentoFilter').addEventListener('change', refreshDashboard);
-            document.getElementById('monthFilter').addEventListener('change', refreshDashboard);
-            document.getElementById('yearFilter').addEventListener('change', refreshDashboard);
+        function toggleFilter(filtro) {
+            const content = document.getElementById('content-' + filtro);
+            const arrow = document.getElementById('arrow-' + filtro);
+            
+            content.classList.toggle('open');
+            arrow.classList.toggle('open');
         }
 
         function carregarDados() {
             const contentContainer = document.getElementById('contentContainer');
             contentContainer.innerHTML = '<div class="loading">⏳ Sincronizando dados...</div>';
 
-            // Usar CORS proxy para contornar restrições
-            const corsProxy = 'https://api.allorigins.win/raw?url=';
-            const url = corsProxy + encodeURIComponent(API_URL);
-
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    allData = data.dados || data;
-                    if (!Array.isArray(allData)) {
-                        allData = Object.values(allData);
-                    }
-                    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
-                    initializeDashboard();
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    contentContainer.innerHTML = '<div class="error">❌ Erro ao carregar dados. Verifique a conexão.</div>';
-                });
+            const script = document.createElement('script');
+            script.src = API_URL + '?callback=processarDados';
+            script.onerror = function() {
+                console.error('Erro ao carregar dados');
+                contentContainer.innerHTML = '<div class="error">❌ Erro ao carregar dados. Verifique a conexão.</div>';
+            };
+            document.head.appendChild(script);
         }
+
+        window.processarDados = function(data) {
+            const contentContainer = document.getElementById('contentContainer');
+            try {
+                allData = data.dados || [];
+                if (!Array.isArray(allData)) {
+                    allData = Object.values(allData);
+                }
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
+                initializeDashboard();
+            } catch(e) {
+                console.error('Erro ao processar dados:', e);
+                contentContainer.innerHTML = '<div class="error">❌ Erro ao processar dados.</div>';
+            }
+        };
 
         function initializeDashboard() {
             populateFilters();
-            populateEmpreendimentos();
+            createTabs();
             displayTab('dashboard');
         }
 
-        function populateFilters() {
-            const months = new Set();
-            const years = new Set();
+        function createTabs() {
             const coordenadores = new Set();
-
             allData.forEach(row => {
-                if (row['MÊS']) months.add(row['MÊS'].trim());
-                if (row['ANO']) years.add(row['ANO'].trim());
                 if (row['Coordenador']) coordenadores.add(row['Coordenador'].trim());
             });
 
-            const monthSelect = document.getElementById('monthFilter');
-            monthSelect.innerHTML = '<option value="">Todos</option>';
-            Array.from(months).sort().forEach(month => {
-                const option = document.createElement('option');
-                option.value = month;
-                option.textContent = month;
-                monthSelect.appendChild(option);
-            });
+            const tabsContainer = document.getElementById('tabsContainer');
+            tabsContainer.innerHTML = '<button class="tab-button active" onclick="displayTab(\'dashboard\')">📊 Dashboard</button>';
 
-            const yearSelect = document.getElementById('yearFilter');
-            yearSelect.innerHTML = '<option value="">Todos</option>';
-            Array.from(years).sort().reverse().forEach(year => {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                yearSelect.appendChild(option);
-            });
-
-            const coordSelect = document.getElementById('coordenadorFilter');
-            coordSelect.innerHTML = '<option value="">Todos</option>';
             Array.from(coordenadores).sort().forEach(coord => {
-                const option = document.createElement('option');
-                option.value = coord;
-                option.textContent = coord;
-                coordSelect.appendChild(option);
+                const button = document.createElement('button');
+                button.className = 'tab-button';
+                button.textContent = coord;
+                button.onclick = () => displayTab(coord);
+                tabsContainer.appendChild(button);
             });
         }
 
-        function populateEmpreendimentos() {
-            const coordenador = document.getElementById('coordenadorFilter').value;
-            const type = document.getElementById('typeFilter').value;
+        function populateFilters() {
+            const coordenadores = new Set();
             const empreendimentos = new Set();
+            const meses = new Set();
+            const anos = new Set();
 
             allData.forEach(row => {
-                if (coordenador && row['Coordenador']?.trim() !== coordenador) return;
-                if (type && !row['Coordenador']?.includes(type)) return;
-                if (row['EMPREENDIMENTO']) {
-                    empreendimentos.add(row['EMPREENDIMENTO'].trim());
-                }
+                if (row['Coordenador']) coordenadores.add(row['Coordenador'].trim());
+                if (row['EMPREENDIMENTO']) empreendimentos.add(row['EMPREENDIMENTO'].trim());
+                if (row['MÊS']) meses.add(row['MÊS'].trim());
+                if (row['ANO']) anos.add(String(row['ANO']).trim());
             });
 
-            const empreendimentoSelect = document.getElementById('empreendimentoFilter');
-            const currentValue = empreendimentoSelect.value;
-            empreendimentoSelect.innerHTML = '<option value="">Todos</option>';
-            Array.from(empreendimentos).sort().forEach(emp => {
-                const option = document.createElement('option');
-                option.value = emp;
-                option.textContent = emp;
-                empreendimentoSelect.appendChild(option);
+            const coordList = document.getElementById('coordenador-list');
+            coordList.innerHTML = '';
+            Array.from(coordenadores).sort().forEach(coord => {
+                coordList.innerHTML += `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="coord-${coord}" value="${coord}" onchange="refreshDashboard()">
+                        <label for="coord-${coord}">${coord}</label>
+                    </div>
+                `;
             });
-            empreendimentoSelect.value = currentValue;
+
+            const empList = document.getElementById('empreendimento-list');
+            empList.innerHTML = '';
+            Array.from(empreendimentos).sort().forEach(emp => {
+                empList.innerHTML += `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="emp-${emp}" value="${emp}" onchange="refreshDashboard()">
+                        <label for="emp-${emp}">${emp}</label>
+                    </div>
+                `;
+            });
+
+            const mesList = document.getElementById('mes-list');
+            mesList.innerHTML = '';
+            Array.from(meses).sort().forEach(mes => {
+                mesList.innerHTML += `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="mes-${mes}" value="${mes}" onchange="refreshDashboard()">
+                        <label for="mes-${mes}">${mes}</label>
+                    </div>
+                `;
+            });
+
+            const anoList = document.getElementById('ano-list');
+            anoList.innerHTML = '';
+            Array.from(anos).sort().reverse().forEach(ano => {
+                anoList.innerHTML += `
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ano-${ano}" value="${ano}" onchange="refreshDashboard()">
+                        <label for="ano-${ano}">${ano}</label>
+                    </div>
+                `;
+            });
         }
 
         function displayTab(tabName) {
             currentTab = tabName;
+            
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
             if (tabName === 'dashboard') {
                 renderDashboard();
+            } else {
+                renderTableTab(tabName);
             }
         }
 
+        function getSelectedFilters() {
+            const coordenadores = Array.from(document.querySelectorAll('#coordenador-list input:checked')).map(el => el.value);
+            const empreendimentos = Array.from(document.querySelectorAll('#empreendimento-list input:checked')).map(el => el.value);
+            const meses = Array.from(document.querySelectorAll('#mes-list input:checked')).map(el => el.value);
+            const anos = Array.from(document.querySelectorAll('#ano-list input:checked')).map(el => el.value);
+
+            return { coordenadores, empreendimentos, meses, anos };
+        }
+
         function getFilteredData() {
-            const coordenador = document.getElementById('coordenadorFilter').value;
-            const type = document.getElementById('typeFilter').value;
-            const empreendimento = document.getElementById('empreendimentoFilter').value;
-            const month = document.getElementById('monthFilter').value;
-            const year = document.getElementById('yearFilter').value;
+            const filters = getSelectedFilters();
 
             return allData.filter(row => {
                 let matches = true;
 
-                if (coordenador && row['Coordenador']?.trim() !== coordenador) matches = false;
-                if (type && !row['Coordenador']?.includes(type)) matches = false;
-                if (empreendimento && row['EMPREENDIMENTO']?.trim() !== empreendimento) matches = false;
-                if (month && row['MÊS']?.trim() !== month) matches = false;
-                if (year && row['ANO']?.trim() !== year) matches = false;
+                if (filters.coordenadores.length > 0 && !filters.coordenadores.includes(row['Coordenador']?.trim())) matches = false;
+                if (filters.empreendimentos.length > 0 && !filters.empreendimentos.includes(row['EMPREENDIMENTO']?.trim())) matches = false;
+                if (filters.meses.length > 0 && !filters.meses.includes(row['MÊS']?.trim())) matches = false;
+                if (filters.anos.length > 0 && !filters.anos.includes(String(row['ANO']).trim())) matches = false;
 
                 return matches;
             });
         }
 
         function refreshDashboard() {
-            renderDashboard();
+            if (currentTab === 'dashboard') {
+                renderDashboard();
+            }
         }
 
         function renderDashboard() {
@@ -646,12 +701,10 @@
             let totalPastas = 0;
 
             data.forEach(row => {
-                Object.entries(row).forEach(([key, value]) => {
-                    if (key === 'VISITA') totalVisitas += parseInt(value) || 0;
-                    if (key === 'QTD PASTA ') totalPastas += parseInt(value) || 0;
-                    if (key === 'QTD VENDA ') totalVendas += parseInt(value) || 0;
-                    if (key === 'VGV') totalVGV += parseFloat(String(value).replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
-                });
+                totalVisitas += parseInt(row['VISITA']) || 0;
+                totalPastas += parseInt(row['QTD PASTA ']) || 0;
+                totalVendas += parseInt(row['QTD VENDA ']) || 0;
+                totalVGV += parseInt(row['VGV']) || 0;
             });
 
             let html = '<div class="stats-grid">';
@@ -661,7 +714,6 @@
             html += `<div class="stat-card"><h4>Pastas</h4><div class="value">${totalPastas}</div></div>`;
             html += '</div>';
 
-            // Funil
             html += '<div class="chart-card" style="grid-column: 1 / -1;"><h3>📊 Funil de Vendas</h3>';
             html += '<div class="funnel-container">';
 
@@ -702,6 +754,36 @@
             }, 100);
         }
 
+        function renderTableTab(coordenador) {
+            const data = allData.filter(row => row['Coordenador']?.trim() === coordenador);
+            const contentContainer = document.getElementById('contentContainer');
+
+            if (data.length === 0) {
+                contentContainer.innerHTML = '<p style="text-align: center; padding: 40px;">Nenhum dado encontrado</p>';
+                return;
+            }
+
+            const headers = Object.keys(data[0]);
+            let html = '<div class="table-wrapper"><table><thead><tr>';
+
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+
+            html += '</tr></thead><tbody>';
+
+            data.forEach(row => {
+                html += '<tr>';
+                headers.forEach(header => {
+                    html += `<td>${row[header] || ''}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            contentContainer.innerHTML = html;
+        }
+
         function createCharts(data) {
             const vendidosPorMes = {};
             const vendidosPorEmpreendimento = {};
@@ -709,15 +791,10 @@
 
             data.forEach(row => {
                 const mes = row['MÊS']?.trim() || 'Sem mês';
-                const empreendimento = row['EMPREENDIMENTO'] || 'Sem empreendimento';
-                const coordenador = row['Coordenador'] || 'Desconhecido';
+                const empreendimento = row['EMPREENDIMENTO']?.trim() || 'Sem empreendimento';
+                const coordenador = row['Coordenador']?.trim() || 'Desconhecido';
 
-                let vendas = 0;
-                Object.entries(row).forEach(([key, value]) => {
-                    if (key === 'QTD VENDA ') {
-                        vendas += parseInt(value) || 0;
-                    }
-                });
+                const vendas = parseInt(row['QTD VENDA ']) || 0;
 
                 vendidosPorMes[mes] = (vendidosPorMes[mes] || 0) + vendas;
                 vendidosPorEmpreendimento[empreendimento] = (vendidosPorEmpreendimento[empreendimento] || 0) + vendas;
