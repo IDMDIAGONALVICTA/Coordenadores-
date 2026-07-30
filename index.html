@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Interativo - Informações Coordenadores</title>
+    <title>Dashboard Interativo - Coordenadores</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         * {
@@ -14,13 +14,13 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2d5016 0%, #1a3a0a 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
@@ -29,7 +29,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2d5016 0%, #1a3a0a 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -47,8 +47,8 @@
 
         .controls {
             padding: 20px 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
+            background: #f5f1e8;
+            border-bottom: 1px solid #e0d5c0;
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
@@ -65,6 +65,7 @@
             font-weight: 600;
             color: #333;
             font-size: 14px;
+            white-space: nowrap;
         }
 
         .control-group input,
@@ -75,13 +76,14 @@
             font-size: 14px;
             background: white;
             color: #333;
+            min-width: 120px;
         }
 
         .control-group input:focus,
         .control-group select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #2d5016;
+            box-shadow: 0 0 0 3px rgba(45, 80, 22, 0.1);
         }
 
         .btn-group {
@@ -98,17 +100,18 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .btn-primary {
-            background: #667eea;
+            background: #2d5016;
             color: white;
         }
 
         .btn-primary:hover {
-            background: #5568d3;
+            background: #1a3a0a;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(45, 80, 22, 0.4);
         }
 
         .btn-secondary {
@@ -141,13 +144,13 @@
         }
 
         .tab-button:hover {
-            background: #f8f9fa;
-            color: #667eea;
+            background: #f5f1e8;
+            color: #2d5016;
         }
 
         .tab-button.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
+            color: #2d5016;
+            border-bottom-color: #2d5016;
         }
 
         .content {
@@ -198,7 +201,7 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2d5016 0%, #3d7c1f 100%);
             color: white;
             padding: 20px;
             border-radius: 8px;
@@ -219,42 +222,67 @@
 
         .table-wrapper {
             overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 0;
+            font-size: 12px;
         }
 
         thead {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #2d5016 0%, #3d7c1f 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         th {
-            padding: 15px;
+            padding: 12px 10px;
             text-align: left;
             font-weight: 700;
-            color: #333;
-            border-bottom: 2px solid #e0e0e0;
-            font-size: 13px;
+            color: white;
+            border-bottom: 2px solid #1a3a0a;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         td {
-            padding: 12px 15px;
+            padding: 10px;
             border-bottom: 1px solid #e0e0e0;
             color: #555;
-            font-size: 14px;
+            font-size: 12px;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s ease;
         }
 
         tbody tr:hover {
-            background: #f8f9fa;
+            background: #f0f4ff !important;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: #ffffff;
         }
 
         tbody tr:nth-child(even) {
-            background: #fafbfc;
+            background: #f8f9fc;
+        }
+
+        td:nth-child(n+5) {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+
+        th:nth-child(n+5) {
+            text-align: right;
         }
 
         .footer {
@@ -279,6 +307,70 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
+        }
+
+        .funnel-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 40px 20px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .funnel-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .funnel-bar {
+            height: 80px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .funnel-bar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+        }
+
+        .funnel-label {
+            font-weight: 700;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .funnel-percentage {
+            text-align: center;
+            font-weight: 600;
+            color: #2d5016;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px;
+            border: 1px solid #f5c6cb;
         }
 
         @media (max-width: 1200px) {
@@ -312,6 +404,18 @@
             .chart-container {
                 height: 250px;
             }
+
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 8px 6px;
+            }
+
+            .control-group select {
+                min-width: 100px;
+            }
         }
     </style>
 </head>
@@ -319,7 +423,7 @@
     <div class="container">
         <div class="header">
             <h1>📊 Dashboard Interativo - Coordenadores</h1>
-            <p><span class="status-indicator"></span>Gráficos e análises em tempo real</p>
+            <p><span class="status-indicator"></span>Dados sincronizados automaticamente com Google Sheets</p>
         </div>
 
         <div class="controls">
@@ -327,10 +431,22 @@
                 <label for="coordenadorFilter">👤 Coordenador:</label>
                 <select id="coordenadorFilter">
                     <option value="">Todos</option>
-                    <option value="RAILDA">RAILDA</option>
-                    <option value="RENATA">RENATA</option>
-                    <option value="ANDERSON">ANDERSON</option>
-                    <option value="VICTÓRIA">VICTÓRIA</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="typeFilter">🏢 Tipo:</label>
+                <select id="typeFilter">
+                    <option value="">Todos</option>
+                    <option value="IMOB">IMOB</option>
+                    <option value="HOUSE">HOUSE</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="empreendimentoFilter">🏗️ Empreendimento:</label>
+                <select id="empreendimentoFilter">
+                    <option value="">Todos</option>
                 </select>
             </div>
 
@@ -355,98 +471,82 @@
         </div>
 
         <div class="tabs" id="tabsContainer">
-            <!-- Tabs serão geradas dinamicamente -->
+            <button class="tab-button active" onclick="displayTab('dashboard')">📊 Dashboard</button>
         </div>
 
         <div class="content" id="contentContainer">
-            <!-- Conteúdo será gerado dinamicamente -->
+            <div class="loading">⏳ Carregando dados...</div>
         </div>
 
         <div class="footer">
-            <p>Última atualização: <span id="lastUpdate">--:--</span> | Dashboard com dados sincronizados</p>
+            <p>Última atualização: <span id="lastUpdate">--:--</span> | Sincronização automática a cada 5 minutos</p>
         </div>
     </div>
 
     <script>
-        // Dados embutidos
-        const SHEET_DATA = {
-            "RAILDA - IMOB": [],
-            "RAILDA - HOUSE": [],
-            "RENATA - IMOB": [],
-            "RENATA - HOUSE": [],
-            "ANDERSON - IMOB": [],
-            "ANDERSON - HOUSE": [],
-            "VICTÓRIA - IMOB": [],
-            "VICTÓRIA - HOUSE": []
-        };
-
-        let allData = {};
-        let currentTab = 'dashboard';
+        let allData = [];
         let charts = {};
+        let currentTab = 'dashboard';
+
+        // URL da API do Google Apps Script
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz5tzNtpfR4_ulmb3Qohxl1pHVk7L-VHYi9Bl7p6V8qQGanVyAYdyRlLDXn0NhPpD165w/exec';
 
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
-            initializeDashboard();
+            carregarDados();
+            // Atualizar dados a cada 5 minutos
+            setInterval(carregarDados, 5 * 60 * 1000);
         });
 
         function setupEventListeners() {
-            document.getElementById('coordenadorFilter').addEventListener('change', refreshDashboard);
+            document.getElementById('coordenadorFilter').addEventListener('change', () => { populateEmpreendimentos(); refreshDashboard(); });
+            document.getElementById('typeFilter').addEventListener('change', () => { populateEmpreendimentos(); refreshDashboard(); });
+            document.getElementById('empreendimentoFilter').addEventListener('change', refreshDashboard);
             document.getElementById('monthFilter').addEventListener('change', refreshDashboard);
             document.getElementById('yearFilter').addEventListener('change', refreshDashboard);
         }
 
-        function initializeDashboard() {
-            // Carregar dados da URL
-            fetch('dados_js.js')
-                .then(response => response.text())
-                .then(text => {
-                    // Extrair dados do arquivo JS
-                    const match = text.match(/const SHEET_DATA = ({[\s\S]*});/);
-                    if (match) {
-                        allData = JSON.parse(match[1]);
-                        populateTabs();
-                        populateFilters();
-                        displayTab('dashboard');
-                        updateLastUpdate();
+        function carregarDados() {
+            const contentContainer = document.getElementById('contentContainer');
+            contentContainer.innerHTML = '<div class="loading">⏳ Sincronizando dados...</div>';
+
+            // Usar CORS proxy para contornar restrições
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
+            const url = corsProxy + encodeURIComponent(API_URL);
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    allData = data.dados || data;
+                    if (!Array.isArray(allData)) {
+                        allData = Object.values(allData);
                     }
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
+                    initializeDashboard();
                 })
                 .catch(error => {
-                    console.error('Erro ao carregar dados:', error);
-                    // Usar dados padrão se o arquivo não existir
-                    allData = SHEET_DATA;
-                    populateTabs();
-                    populateFilters();
-                    displayTab('dashboard');
+                    console.error('Erro:', error);
+                    contentContainer.innerHTML = '<div class="error">❌ Erro ao carregar dados. Verifique a conexão.</div>';
                 });
         }
 
-        function populateTabs() {
-            const tabsContainer = document.getElementById('tabsContainer');
-            tabsContainer.innerHTML = '';
-            
-            const tabs = ['dashboard', ...Object.keys(allData)];
-            tabs.forEach(tabName => {
-                const button = document.createElement('button');
-                button.className = 'tab-button' + (tabName === currentTab ? ' active' : '');
-                button.textContent = tabName === 'dashboard' ? '📊 Dashboard' : tabName;
-                button.onclick = () => displayTab(tabName);
-                tabsContainer.appendChild(button);
-            });
+        function initializeDashboard() {
+            populateFilters();
+            populateEmpreendimentos();
+            displayTab('dashboard');
         }
 
         function populateFilters() {
             const months = new Set();
             const years = new Set();
-            
-            Object.values(allData).forEach(data => {
-                if (Array.isArray(data)) {
-                    data.forEach(row => {
-                        if (row['MÊS']) months.add(row['MÊS'].trim());
-                        if (row['ANO']) years.add(row['ANO'].trim());
-                    });
-                }
+            const coordenadores = new Set();
+
+            allData.forEach(row => {
+                if (row['MÊS']) months.add(row['MÊS'].trim());
+                if (row['ANO']) years.add(row['ANO'].trim());
+                if (row['Coordenador']) coordenadores.add(row['Coordenador'].trim());
             });
-            
+
             const monthSelect = document.getElementById('monthFilter');
             monthSelect.innerHTML = '<option value="">Todos</option>';
             Array.from(months).sort().forEach(month => {
@@ -455,7 +555,7 @@
                 option.textContent = month;
                 monthSelect.appendChild(option);
             });
-            
+
             const yearSelect = document.getElementById('yearFilter');
             yearSelect.innerHTML = '<option value="">Todos</option>';
             Array.from(years).sort().reverse().forEach(year => {
@@ -464,105 +564,139 @@
                 option.textContent = year;
                 yearSelect.appendChild(option);
             });
+
+            const coordSelect = document.getElementById('coordenadorFilter');
+            coordSelect.innerHTML = '<option value="">Todos</option>';
+            Array.from(coordenadores).sort().forEach(coord => {
+                const option = document.createElement('option');
+                option.value = coord;
+                option.textContent = coord;
+                coordSelect.appendChild(option);
+            });
+        }
+
+        function populateEmpreendimentos() {
+            const coordenador = document.getElementById('coordenadorFilter').value;
+            const type = document.getElementById('typeFilter').value;
+            const empreendimentos = new Set();
+
+            allData.forEach(row => {
+                if (coordenador && row['Coordenador']?.trim() !== coordenador) return;
+                if (type && !row['Coordenador']?.includes(type)) return;
+                if (row['EMPREENDIMENTO']) {
+                    empreendimentos.add(row['EMPREENDIMENTO'].trim());
+                }
+            });
+
+            const empreendimentoSelect = document.getElementById('empreendimentoFilter');
+            const currentValue = empreendimentoSelect.value;
+            empreendimentoSelect.innerHTML = '<option value="">Todos</option>';
+            Array.from(empreendimentos).sort().forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp;
+                option.textContent = emp;
+                empreendimentoSelect.appendChild(option);
+            });
+            empreendimentoSelect.value = currentValue;
         }
 
         function displayTab(tabName) {
             currentTab = tabName;
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.textContent.includes(tabName === 'dashboard' ? 'Dashboard' : tabName)) {
-                    btn.classList.add('active');
-                }
-            });
-            
             if (tabName === 'dashboard') {
                 renderDashboard();
-            } else {
-                renderTableTab(tabName);
             }
         }
 
         function getFilteredData() {
             const coordenador = document.getElementById('coordenadorFilter').value;
+            const type = document.getElementById('typeFilter').value;
+            const empreendimento = document.getElementById('empreendimentoFilter').value;
             const month = document.getElementById('monthFilter').value;
             const year = document.getElementById('yearFilter').value;
-            
-            let filteredData = [];
-            
-            Object.entries(allData).forEach(([sheetName, data]) => {
-                if (!Array.isArray(data)) return;
-                if (coordenador && !sheetName.includes(coordenador)) return;
-                
-                data.forEach(row => {
-                    let matches = true;
-                    
-                    if (month && row['MÊS']?.trim() !== month) matches = false;
-                    if (year && row['ANO']?.trim() !== year) matches = false;
-                    
-                    if (matches) {
-                        filteredData.push({...row, _sheetName: sheetName});
-                    }
-                });
+
+            return allData.filter(row => {
+                let matches = true;
+
+                if (coordenador && row['Coordenador']?.trim() !== coordenador) matches = false;
+                if (type && !row['Coordenador']?.includes(type)) matches = false;
+                if (empreendimento && row['EMPREENDIMENTO']?.trim() !== empreendimento) matches = false;
+                if (month && row['MÊS']?.trim() !== month) matches = false;
+                if (year && row['ANO']?.trim() !== year) matches = false;
+
+                return matches;
             });
-            
-            return filteredData;
         }
 
         function refreshDashboard() {
-            if (currentTab === 'dashboard') {
-                renderDashboard();
-            }
+            renderDashboard();
         }
 
         function renderDashboard() {
             const data = getFilteredData();
             const contentContainer = document.getElementById('contentContainer');
-            
+
             if (data.length === 0) {
                 contentContainer.innerHTML = '<p style="text-align: center; padding: 40px;">Nenhum dado encontrado</p>';
                 return;
             }
-            
-            // Calcular estatísticas
+
             let totalVendas = 0;
             let totalVGV = 0;
-            let totalConfirmadas = 0;
-            let totalEmProcesso = 0;
-            
+            let totalVisitas = 0;
+            let totalPastas = 0;
+
             data.forEach(row => {
                 Object.entries(row).forEach(([key, value]) => {
-                    if (key.includes('QTD VENDA') && !key.includes('CONFIRMADA') && !key.includes('PROCESSO')) {
-                        totalVendas += parseInt(value) || 0;
-                    }
-                    if (key === 'VGV') {
-                        const num = parseFloat(String(value).replace(/[^\d,.-]/g, '').replace(',', '.'));
-                        totalVGV += num || 0;
-                    }
-                    if (key.includes('CONFIRMADA')) {
-                        totalConfirmadas += parseInt(value) || 0;
-                    }
-                    if (key.includes('PROCESSO')) {
-                        totalEmProcesso += parseInt(value) || 0;
-                    }
+                    if (key === 'VISITA') totalVisitas += parseInt(value) || 0;
+                    if (key === 'QTD PASTA ') totalPastas += parseInt(value) || 0;
+                    if (key === 'QTD VENDA ') totalVendas += parseInt(value) || 0;
+                    if (key === 'VGV') totalVGV += parseFloat(String(value).replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
                 });
             });
-            
+
             let html = '<div class="stats-grid">';
             html += `<div class="stat-card"><h4>Total de Vendas</h4><div class="value">${totalVendas}</div></div>`;
             html += `<div class="stat-card"><h4>VGV Total</h4><div class="value">R$ ${(totalVGV / 1000000).toFixed(1)}M</div></div>`;
-            html += `<div class="stat-card"><h4>Confirmadas</h4><div class="value">${totalConfirmadas}</div></div>`;
-            html += `<div class="stat-card"><h4>Em Processo</h4><div class="value">${totalEmProcesso}</div></div>`;
+            html += `<div class="stat-card"><h4>Visitas</h4><div class="value">${totalVisitas}</div></div>`;
+            html += `<div class="stat-card"><h4>Pastas</h4><div class="value">${totalPastas}</div></div>`;
             html += '</div>';
-            
+
+            // Funil
+            html += '<div class="chart-card" style="grid-column: 1 / -1;"><h3>📊 Funil de Vendas</h3>';
+            html += '<div class="funnel-container">';
+
+            html += '<div class="funnel-stage">';
+            html += '<div class="funnel-label">👥 Visita</div>';
+            html += `<div class="funnel-bar" style="width: 100%; background: linear-gradient(135deg, #2d5016 0%, #1a3a0a 100%);">${totalVisitas}</div>`;
+            html += `<div class="funnel-percentage">100%</div>`;
+            html += '</div>';
+
+            const convPastaVisita = totalVisitas > 0 ? (totalPastas / totalVisitas) * 100 : 0;
+            const widthPasta = totalVisitas > 0 ? (totalPastas / totalVisitas) * 100 : 0;
+            html += '<div class="funnel-stage">';
+            html += '<div class="funnel-label">📋 Pasta</div>';
+            html += `<div class="funnel-bar" style="width: ${widthPasta}%; background: linear-gradient(135deg, #f5f1e8 0%, #e8dcc8 100%); color: #2d5016;">${totalPastas}</div>`;
+            html += `<div class="funnel-percentage">Pasta → Visita: ${convPastaVisita.toFixed(1)}%</div>`;
+            html += '</div>';
+
+            const convVendaPasta = totalPastas > 0 ? (totalVendas / totalPastas) * 100 : 0;
+            const widthVenda = totalVisitas > 0 ? (totalVendas / totalVisitas) * 100 : 0;
+            html += '<div class="funnel-stage">';
+            html += '<div class="funnel-label">💰 Venda</div>';
+            html += `<div class="funnel-bar" style="width: ${widthVenda}%; background: linear-gradient(135deg, #3d7c1f 0%, #5fa032 100%);">${totalVendas}</div>`;
+            html += `<div class="funnel-percentage">Venda → Pasta: ${convVendaPasta.toFixed(1)}%</div>`;
+            html += '</div>';
+
+            html += '</div></div>';
+
             html += '<div class="dashboard-grid">';
             html += '<div class="chart-card"><h3>📈 Vendas por Mês</h3><div class="chart-container"><canvas id="chartVendasMes"></canvas></div></div>';
             html += '<div class="chart-card"><h3>🏢 Vendas por Empreendimento</h3><div class="chart-container"><canvas id="chartEmpreendimento"></canvas></div></div>';
             html += '<div class="chart-card"><h3>👥 Comparação entre Coordenadores</h3><div class="chart-container"><canvas id="chartCoordenadores"></canvas></div></div>';
-            html += '<div class="chart-card"><h3>💰 Evolução de VGV</h3><div class="chart-container"><canvas id="chartVGV"></canvas></div></div>';
             html += '</div>';
-            
+
             contentContainer.innerHTML = html;
-            
+
             setTimeout(() => {
                 createCharts(data);
             }, 100);
@@ -572,35 +706,26 @@
             const vendidosPorMes = {};
             const vendidosPorEmpreendimento = {};
             const vendidosPorCoordenador = {};
-            const vgvPorMes = {};
-            
+
             data.forEach(row => {
                 const mes = row['MÊS']?.trim() || 'Sem mês';
                 const empreendimento = row['EMPREENDIMENTO'] || 'Sem empreendimento';
-                const coordenador = row._sheetName?.split(' - ')[0] || 'Desconhecido';
-                
+                const coordenador = row['Coordenador'] || 'Desconhecido';
+
                 let vendas = 0;
-                let vgv = 0;
-                
                 Object.entries(row).forEach(([key, value]) => {
-                    if (key.includes('QTD VENDA') && !key.includes('CONFIRMADA') && !key.includes('PROCESSO')) {
+                    if (key === 'QTD VENDA ') {
                         vendas += parseInt(value) || 0;
                     }
-                    if (key === 'VGV') {
-                        const num = parseFloat(String(value).replace(/[^\d,.-]/g, '').replace(',', '.'));
-                        vgv += num || 0;
-                    }
                 });
-                
+
                 vendidosPorMes[mes] = (vendidosPorMes[mes] || 0) + vendas;
                 vendidosPorEmpreendimento[empreendimento] = (vendidosPorEmpreendimento[empreendimento] || 0) + vendas;
                 vendidosPorCoordenador[coordenador] = (vendidosPorCoordenador[coordenador] || 0) + vendas;
-                vgvPorMes[mes] = (vgvPorMes[mes] || 0) + vgv;
             });
-            
-            const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#fee140', '#30b0fe'];
-            
-            // Gráfico de Vendas por Mês
+
+            const colors = ['#2d5016', '#3d7c1f', '#5fa032', '#f5f1e8', '#e8dcc8', '#d9c7a8', '#1a3a0a', '#4a9d3d'];
+
             const ctxMes = document.getElementById('chartVendasMes');
             if (ctxMes) {
                 if (charts.vendasMes) charts.vendasMes.destroy();
@@ -611,8 +736,8 @@
                         datasets: [{
                             label: 'Vendas',
                             data: Object.values(vendidosPorMes),
-                            backgroundColor: colors[0],
-                            borderColor: colors[0],
+                            backgroundColor: '#2d5016',
+                            borderColor: '#1a3a0a',
                             borderWidth: 1
                         }]
                     },
@@ -624,8 +749,7 @@
                     }
                 });
             }
-            
-            // Gráfico de Vendas por Empreendimento
+
             const ctxEmpreendimento = document.getElementById('chartEmpreendimento');
             if (ctxEmpreendimento) {
                 if (charts.empreendimento) charts.empreendimento.destroy();
@@ -645,8 +769,7 @@
                     }
                 });
             }
-            
-            // Gráfico de Comparação entre Coordenadores
+
             const ctxCoordenadores = document.getElementById('chartCoordenadores');
             if (ctxCoordenadores) {
                 if (charts.coordenadores) charts.coordenadores.destroy();
@@ -668,62 +791,6 @@
                     }
                 });
             }
-            
-            // Gráfico de Evolução de VGV
-            const ctxVGV = document.getElementById('chartVGV');
-            if (ctxVGV) {
-                if (charts.vgv) charts.vgv.destroy();
-                charts.vgv = new Chart(ctxVGV, {
-                    type: 'line',
-                    data: {
-                        labels: Object.keys(vgvPorMes),
-                        datasets: [{
-                            label: 'VGV (R$ Milhões)',
-                            data: Object.values(vgvPorMes).map(v => v / 1000000),
-                            borderColor: colors[1],
-                            backgroundColor: 'rgba(118, 75, 162, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: true } },
-                        scales: { y: { beginAtZero: true } }
-                    }
-                });
-            }
-        }
-
-        function renderTableTab(tabName) {
-            const data = allData[tabName] || [];
-            const contentContainer = document.getElementById('contentContainer');
-            
-            if (!Array.isArray(data) || data.length === 0) {
-                contentContainer.innerHTML = '<p style="text-align: center; padding: 40px;">Nenhum dado encontrado</p>';
-                return;
-            }
-            
-            const headers = Object.keys(data[0]);
-            let html = '<div class="table-wrapper"><table>';
-            html += '<thead><tr>';
-            headers.forEach(header => {
-                html += `<th>${header}</th>`;
-            });
-            html += '</tr></thead><tbody>';
-            
-            data.forEach((row, idx) => {
-                html += `<tr style="background: ${idx % 2 === 0 ? '#fafbfc' : 'white'};">`;
-                headers.forEach(header => {
-                    html += `<td>${row[header] || ''}</td>`;
-                });
-                html += '</tr>';
-            });
-            
-            html += '</tbody></table></div>';
-            contentContainer.innerHTML = html;
         }
 
         function exportToCSV() {
@@ -732,8 +799,8 @@
                 alert('Nenhum dado para exportar');
                 return;
             }
-            
-            const headers = Object.keys(data[0]).filter(k => !k.startsWith('_'));
+
+            const headers = Object.keys(data[0]);
             let csv = headers.join(',') + '\n';
             data.forEach(row => {
                 const values = headers.map(header => {
@@ -745,22 +812,16 @@
                 });
                 csv += values.join(',') + '\n';
             });
-            
+
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
-            link.setAttribute('download', `dashboard_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute('download', `dados_${new Date().toISOString().split('T')[0]}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }
-
-        function updateLastUpdate() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('pt-BR');
-            document.getElementById('lastUpdate').textContent = timeString;
         }
     </script>
 </body>
